@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>05 · Structs, Enums &amp; Matching — Rust from Zero</title>
+<meta name="description" content="Structs group related data; enums describe alternatives. Together with match they let you model a problem so precisely that whole categories of bugs become impossible to express.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0b0e13">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A6%80%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body data-lesson="05" data-total="10">
+<div class="read-progress" aria-hidden="true"><span></span></div>
+<div class="shell">
+<aside class="sidebar" id="sidebar">
+<a class="brand" href="../index.html">
+  <span class="brand-mark" aria-hidden="true">🦀</span>
+  <span><span class="brand-name">Rust from Zero</span><span class="brand-sub">Interactive Rust lessons</span></span>
+</a>
+<div class="side-progress">
+  <div class="side-progress-top"><span class="side-progress-label">Your progress</span><span class="side-progress-count" data-progress-count>0 / 10</span></div>
+  <div class="progress-track" data-progress-track role="progressbar" aria-label="Course progress" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0"><span class="progress-fill" data-progress-fill></span></div>
+</div>
+<p class="nav-label">Lessons</p>
+<nav class="nav" aria-label="Lessons">
+<a href="../index.html"><span class="nav-num" aria-hidden="true">⌂</span><span>Course overview</span></a>
+<a href="../lessons/01-hello-rust.html" data-lesson-link="01"><span class="nav-num" aria-hidden="true">01</span><span>Hello, Rust!</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/02-variables-and-types.html" data-lesson-link="02"><span class="nav-num" aria-hidden="true">02</span><span>Variables, Types & Mutability</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/03-functions-and-control-flow.html" data-lesson-link="03"><span class="nav-num" aria-hidden="true">03</span><span>Functions & Control Flow</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/04-ownership-and-borrowing.html" data-lesson-link="04"><span class="nav-num" aria-hidden="true">04</span><span>Ownership & Borrowing</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/05-structs-enums-matching.html" data-lesson-link="05" class="active" aria-current="page"><span class="nav-num" aria-hidden="true">05</span><span>Structs, Enums & Matching</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/06-collections.html" data-lesson-link="06"><span class="nav-num" aria-hidden="true">06</span><span>Vec, String & HashMap</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/07-error-handling.html" data-lesson-link="07"><span class="nav-num" aria-hidden="true">07</span><span>Option, Result & Errors</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/08-traits-generics-lifetimes.html" data-lesson-link="08"><span class="nav-num" aria-hidden="true">08</span><span>Traits, Generics & Lifetimes</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/09-iterators-and-closures.html" data-lesson-link="09"><span class="nav-num" aria-hidden="true">09</span><span>Iterators & Closures</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/10-modules-and-testing.html" data-lesson-link="10"><span class="nav-num" aria-hidden="true">10</span><span>Modules, Crates & Testing</span><span class="nav-check" aria-hidden="true">✓</span></a>
+</nav>
+<div class="side-foot">10 short lessons · read, run, quiz.<br><a href="https://www.rust-lang.org/learn" target="_blank" rel="noopener">Official Rust resources ↗</a></div>
+</aside>
+<div class="scrim"></div>
+<main class="main">
+<header class="topbar">
+<button class="menu-btn" type="button" aria-label="Open lesson menu" aria-controls="sidebar" aria-expanded="false">☰</button>
+<span class="topbar-title">Rust from Zero</span>
+<span class="brand-mark" aria-hidden="true">🦀</span>
+</header>
+<div class="content">
+<header class="lesson-hero">
+<span class="eyebrow">Lesson 05 · Data modelling</span>
+<h1 class="lesson-title">Structs, Enums & Matching</h1>
+<p class="lede">Structs group related data; enums describe alternatives. Together with match they let you model a problem so precisely that whole categories of bugs become impossible to express.</p>
+<div class="lesson-meta">
+<span class="pill">⏱ <strong>22 min</strong></span>
+<span class="pill">🦀 <strong>Beginner</strong></span>
+<span class="pill">✎ <strong>1 exercise</strong></span>
+<span class="pill" data-complete-pill hidden>✓ <strong>Completed</strong></span>
+</div>
+</header>
+<section class="lesson-block" id="read">
+<div class="block-head"><span class="step-badge" aria-hidden="true">1</span><h2>Read</h2><span class="block-sub">The idea</span></div>
+<div class="prose"><p>A struct is a named record: several values bundled together. An enum is a choice between variants, and each variant can carry its own data. Both can have methods. <code>match</code> then forces you to handle every case.</p>
+<h3>Defining and creating structs</h3>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">struct User {
+    username: String,
+    email: String,
+    active: bool,
+    sign_in_count: u64,
+}
+
+fn main() {
+    let user = User {
+        username: String::from(&quot;ferris&quot;),
+        email: String::from(&quot;ferris@example.com&quot;),
+        active: true,
+        sign_in_count: 1,
+    };
+
+    println!(&quot;{} is active: {}&quot;, user.username, user.active);
+}</code></pre>
+</div>
+<p>To modify a field, the whole binding must be mutable: <code>let mut user = ...</code>. Rust does not allow individual fields to be declared mutable.</p>
+<p>When a variable has the same name as a field, field-init shorthand saves noise. The <code>..</code> update syntax fills the remaining fields from another value:</p>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">fn build_user(username: String, email: String) -&gt; User {
+    User {
+        username, // shorthand for username: username
+        email,
+        active: true,
+        sign_in_count: 0,
+    }
+}
+
+let updated = User {
+    email: String::from(&quot;new@example.com&quot;),
+    ..user
+};</code></pre>
+</div>
+<p>Tuple structs are structs without field names. They are handy for wrapping a single value and giving it a distinct type:</p>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">struct Meters(f64);
+
+fn main() {
+    let distance = Meters(42.0);
+    println!(&quot;{} metres&quot;, distance.0);
+}</code></pre>
+</div>
+<h3>Methods and associated functions</h3>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">struct Rectangle {
+    width: f64,
+    height: f64,
+}
+
+impl Rectangle {
+    // Associated function: no self, called as Rectangle::new(...)
+    fn new(width: f64, height: f64) -&gt; Self {
+        Self { width, height }
+    }
+
+    // Method: borrows the instance immutably
+    fn area(&amp;self) -&gt; f64 {
+        self.width * self.height
+    }
+
+    // Method that mutates the instance
+    fn scale(&amp;mut self, factor: f64) {
+        self.width *= factor;
+        self.height *= factor;
+    }
+}
+
+fn main() {
+    let mut rect = Rectangle::new(3.0, 4.0);
+    println!(&quot;area: {}&quot;, rect.area());
+    rect.scale(2.0);
+    println!(&quot;area: {}&quot;, rect.area());
+}</code></pre>
+</div>
+<ul><li><code>&amp;self</code> borrows the value and cannot mutate it; use it for read-only methods.</li><li><code>&amp;mut self</code> borrows mutably; the caller needs a mutable binding.</li><li><code>self</code> takes ownership — useful for builder-style transformations, but the caller loses the original value.</li><li><code>Self</code> is an alias for the type the <code>impl</code> block belongs to.</li></ul>
+<p>You can implement multiple <code>impl</code> blocks for the same type. Common traits are usually derived instead of written by hand:</p>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">#[derive(Debug, Clone, PartialEq)]
+struct Point {
+    x: i32,
+    y: i32,
+}
+
+fn main() {
+    let p = Point { x: 3, y: 7 };
+    let copy = p.clone();
+
+    println!(&quot;{p:?}&quot;);       // Point { x: 3, y: 7 }
+    println!(&quot;{p:#?}&quot;);      // pretty-printed, one field per line
+    println!(&quot;equal: {}&quot;, p == copy);
+}</code></pre>
+</div>
+<p>Without <code>#[derive(Debug)]</code>, <code>{:?}</code> will not compile. Deriving is opt-in: you only get what you ask for.</p>
+<h3>Enums with data</h3>
+<p>Unlike C-style enums, Rust variants can carry data. This makes enums ideal for representing messages, states, and shapes:</p>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">#[derive(Debug)]
+enum Shape {
+    Circle(f64),
+    Rectangle { width: f64, height: f64 },
+    Triangle { base: f64, height: f64 },
+}
+
+fn area(shape: &amp;Shape) -&gt; f64 {
+    match shape {
+        Shape::Circle(radius) =&gt; 3.14159 * radius * radius,
+        Shape::Rectangle { width, height } =&gt; width * height,
+        Shape::Triangle { base, height } =&gt; 0.5 * base * height,
+    }
+}
+
+fn main() {
+    let shapes = [
+        Shape::Circle(1.0),
+        Shape::Rectangle { width: 2.0, height: 3.0 },
+        Shape::Triangle { base: 4.0, height: 2.0 },
+    ];
+
+    for shape in &amp;shapes {
+        println!(&quot;{:?} -&gt; {:.2}&quot;, shape, area(shape));
+    }
+}</code></pre>
+</div>
+<p><code>match</code> takes a value, compares it against patterns, and binds the data inside each variant. It must be exhaustive: every variant has to be covered, or you need a <code>_</code> catch-all. The compiler checks this for you.</p>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">fn describe(n: i32) -&gt; &amp;'static str {
+    match n {
+        0 =&gt; &quot;zero&quot;,
+        1..=9 =&gt; &quot;single digit&quot;,
+        n if n &lt; 0 =&gt; &quot;negative&quot;,
+        _ =&gt; &quot;large&quot;,
+    }
+}</code></pre>
+</div>
+<p>Patterns can match literals, ranges, tuples, structs, and enum variants. Guards (<code>n if n &lt; 0</code>) add a condition. Use <code>|</code> for alternatives: <code>1 | 2 | 3</code>.</p>
+<h3>Option: Rust's answer to null</h3>
+<p>The standard library defines <code>Option&lt;T&gt;</code> as an enum with two variants: <code>Some(T)</code> and <code>None</code>. A value is either present or absent, and the type system makes you handle both cases:</p>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">fn index_of(haystack: &amp;[&amp;str], needle: &amp;str) -&gt; Option&lt;usize&gt; {
+    haystack.iter().position(|item| *item == needle)
+}
+
+fn main() {
+    let fruits = [&quot;apple&quot;, &quot;pear&quot;, &quot;plum&quot;];
+
+    match index_of(&amp;fruits, &quot;pear&quot;) {
+        Some(index) =&gt; println!(&quot;pear is at {index}&quot;),
+        None =&gt; println!(&quot;not found&quot;),
+    }
+
+    if let Some(index) = index_of(&amp;fruits, &quot;plum&quot;) {
+        println!(&quot;plum is at {index}&quot;);
+    }
+}</code></pre>
+</div>
+<p><code>if let</code> is shorthand for a <code>match</code> with one interesting arm. <code>while let</code> does the same in a loop. There is no null in Rust, so there is no null pointer to accidentally dereference.</p>
+<div class="callout tip">
+<span class="callout-title">Model the states, not the flags</span>
+<p>Instead of a struct with <code>is_loading</code>, <code>has_error</code>, and <code>data</code> fields that can contradict each other, use an enum with <code>Loading</code>, <code>Failed(Error)</code>, and <code>Ready(Data)</code> variants. Then impossible states cannot be constructed.</p>
+</div></div>
+</section>
+<section class="lesson-block" id="practice">
+<div class="block-head"><span class="step-badge" aria-hidden="true">2</span><h2>Practice</h2><span class="block-sub">Live compiler</span></div>
+<div class="task">
+<span class="task-label">✦ Your turn</span><p>The traffic light enum compiles only when the <code>match</code> is exhaustive. Add the missing <code>Yellow</code> and <code>Green</code> arms so the program runs and prints each action.</p>
+<span class="expected" aria-label="Expected output">Red: stop
+Yellow: slow down
+Green: go</span>
+<p class="hint">Each arm looks like <code>TrafficLight::Yellow =&gt; &quot;slow down&quot;,</code>. The match arms are separated by commas.</p>
+</div>
+<div class="playground">
+<div class="pg-head">
+  <div class="pg-title"><span class="pg-dots" aria-hidden="true"><i></i><i></i><i></i></span>main.rs <span class="pg-badge">edition 2021</span></div>
+  <div class="pg-actions">
+    <button type="button" class="btn btn-ghost pg-solution">Solution</button>
+    <button type="button" class="btn btn-ghost pg-reset">Reset</button>
+    <button type="button" class="btn btn-primary pg-run"><span class="run-label">▶ Run</span> <kbd>Ctrl ↵</kbd></button>
+  </div>
+</div>
+<div class="editor">
+  <pre class="editor-highlight" aria-hidden="true"><code class="rust"></code></pre>
+  <textarea class="editor-input" spellcheck="false" wrap="off" autocapitalize="off" autocomplete="off" aria-label="Rust code editor">#[derive(Debug)]
+enum TrafficLight {
+    Red,
+    Yellow,
+    Green,
+}
+
+impl TrafficLight {
+    fn action(&amp;self) -&gt; &amp;str {
+        match self {
+            TrafficLight::Red =&gt; &quot;stop&quot;,
+            // TODO: handle Yellow and Green
+        }
+    }
+}
+
+fn main() {
+    let lights = [TrafficLight::Red, TrafficLight::Yellow, TrafficLight::Green];
+
+    for light in lights {
+        println!(&quot;{:?}: {}&quot;, light, light.action());
+    }
+}</textarea>
+</div>
+<div class="pg-output" hidden>
+  <div class="pg-output-head"><span>Output</span><span class="pg-status idle">ready</span></div>
+  <pre class="pg-out" aria-live="polite"></pre>
+  <div class="pg-verdict" role="status"></div>
+  <div class="pg-warn" hidden>
+    <div class="pg-output-head"><span>Compiler notes</span></div>
+    <pre></pre>
+  </div>
+</div>
+<div class="pg-note">Runs on the official <a href="https://play.rust-lang.org" target="_blank" rel="noopener">Rust Playground</a> · stable · internet required</div>
+<script type="text/plain" class="pg-expect">Red: stop
+Yellow: slow down
+Green: go</script>
+<script type="text/plain" class="pg-solution-code">#[derive(Debug)]
+enum TrafficLight {
+    Red,
+    Yellow,
+    Green,
+}
+
+impl TrafficLight {
+    fn action(&self) -> &str {
+        match self {
+            TrafficLight::Red => "stop",
+            TrafficLight::Yellow => "slow down",
+            TrafficLight::Green => "go",
+        }
+    }
+}
+
+fn main() {
+    let lights = [TrafficLight::Red, TrafficLight::Yellow, TrafficLight::Green];
+
+    for light in lights {
+        println!("{:?}: {}", light, light.action());
+    }
+}</script>
+</div>
+</section>
+<section class="lesson-block" id="quiz">
+<div class="block-head"><span class="step-badge" aria-hidden="true">3</span><h2>Quiz</h2><span class="block-sub">Check yourself</span></div>
+<div class="prose quiz-intro"><p>Four questions. Get three or more right to complete the lesson — you can retry as often as you like.</p></div>
+<div class="quiz">
+<fieldset class="quiz-q" data-answer="0">
+<legend><span class="q-num" aria-hidden="true">01</span><span>What does a method taking <code>&amp;self</code> allow?</span></legend>
+<div class="options"><label class="opt">
+<input type="radio" name="q05_0" value="0">
+<span class="opt-key" aria-hidden="true">A</span>
+<span class="opt-text">Reading the instance and calling other read-only methods.</span>
+</label><label class="opt">
+<input type="radio" name="q05_0" value="1">
+<span class="opt-key" aria-hidden="true">B</span>
+<span class="opt-text">Changing any field of the instance.</span>
+</label><label class="opt">
+<input type="radio" name="q05_0" value="2">
+<span class="opt-key" aria-hidden="true">C</span>
+<span class="opt-text">Taking ownership and consuming the instance.</span>
+</label><label class="opt">
+<input type="radio" name="q05_0" value="3">
+<span class="opt-key" aria-hidden="true">D</span>
+<span class="opt-text">Accessing only static fields.</span>
+</label></div>
+<div class="explain" hidden><strong>Why:</strong> <code>&amp;self</code> is an immutable borrow. To mutate fields, the method needs <code>&amp;mut self</code> and the instance must be a mutable binding. <code>self</code> by value takes ownership.</div>
+</fieldset><fieldset class="quiz-q" data-answer="1">
+<legend><span class="q-num" aria-hidden="true">02</span><span>What must a <code>match</code> expression do?</span></legend>
+<div class="options"><label class="opt">
+<input type="radio" name="q05_1" value="0">
+<span class="opt-key" aria-hidden="true">A</span>
+<span class="opt-text">Return a <code>String</code>.</span>
+</label><label class="opt">
+<input type="radio" name="q05_1" value="1">
+<span class="opt-key" aria-hidden="true">B</span>
+<span class="opt-text">Cover every possible variant, or include a <code>_</code> arm.</span>
+</label><label class="opt">
+<input type="radio" name="q05_1" value="2">
+<span class="opt-key" aria-hidden="true">C</span>
+<span class="opt-text">Contain at least three arms.</span>
+</label><label class="opt">
+<input type="radio" name="q05_1" value="3">
+<span class="opt-key" aria-hidden="true">D</span>
+<span class="opt-text">Use only integer patterns.</span>
+</label></div>
+<div class="explain" hidden><strong>Why:</strong> Exhaustiveness is enforced at compile time. It is what makes <code>match</code> safe when a new enum variant is added later: every use site fails to compile until it handles the new case.</div>
+</fieldset><fieldset class="quiz-q" data-answer="1">
+<legend><span class="q-num" aria-hidden="true">03</span><span>Which pair are the variants of <code>Option&lt;T&gt;</code>?</span></legend>
+<div class="options"><label class="opt">
+<input type="radio" name="q05_2" value="0">
+<span class="opt-key" aria-hidden="true">A</span>
+<span class="opt-text"><code>Ok(T)</code> and <code>Err(E)</code></span>
+</label><label class="opt">
+<input type="radio" name="q05_2" value="1">
+<span class="opt-key" aria-hidden="true">B</span>
+<span class="opt-text"><code>Some(T)</code> and <code>None</code></span>
+</label><label class="opt">
+<input type="radio" name="q05_2" value="2">
+<span class="opt-key" aria-hidden="true">C</span>
+<span class="opt-text"><code>True</code> and <code>False</code></span>
+</label><label class="opt">
+<input type="radio" name="q05_2" value="3">
+<span class="opt-key" aria-hidden="true">D</span>
+<span class="opt-text"><code>Value(T)</code> and <code>Null</code></span>
+</label></div>
+<div class="explain" hidden><strong>Why:</strong> <code>Option</code> models absence with <code>Some</code> and <code>None</code>. <code>Ok</code> and <code>Err</code> belong to <code>Result</code>, which models success and failure (lesson 7).</div>
+</fieldset><fieldset class="quiz-q" data-answer="0">
+<legend><span class="q-num" aria-hidden="true">04</span><span>What does <code>#[derive(Debug)]</code> enable?</span></legend>
+<div class="options"><label class="opt">
+<input type="radio" name="q05_3" value="0">
+<span class="opt-key" aria-hidden="true">A</span>
+<span class="opt-text">Printing the type with <code>{:?}</code> and <code>{:#?}</code>.</span>
+</label><label class="opt">
+<input type="radio" name="q05_3" value="1">
+<span class="opt-key" aria-hidden="true">B</span>
+<span class="opt-text">Comparing two values with <code>==</code>.</span>
+</label><label class="opt">
+<input type="radio" name="q05_3" value="2">
+<span class="opt-key" aria-hidden="true">C</span>
+<span class="opt-text">Cloning the value with <code>.clone()</code>.</span>
+</label><label class="opt">
+<input type="radio" name="q05_3" value="3">
+<span class="opt-key" aria-hidden="true">D</span>
+<span class="opt-text">Converting the value to JSON.</span>
+</label></div>
+<div class="explain" hidden><strong>Why:</strong> <code>Debug</code> provides the developer-facing formatting used by <code>{:?}</code>. Equality needs <code>PartialEq</code>, cloning needs <code>Clone</code>, and JSON is handled by external crates such as <code>serde</code>.</div>
+</fieldset>
+<div class="quiz-actions">
+<button type="button" class="btn btn-primary quiz-check">Check answers</button>
+<button type="button" class="btn btn-ghost quiz-retry">Reset quiz</button>
+<span class="quiz-score" role="status" aria-live="polite"></span>
+</div>
+</div>
+</section>
+<nav class="lesson-nav" aria-label="Lesson navigation">
+<a class="nav-card" href="04-ownership-and-borrowing.html"><span class="dir">← Previous</span><span class="name"><span>04</span> Ownership & Borrowing</span></a>
+<a class="nav-card next" href="06-collections.html"><span class="dir">Next →</span><span class="name"><span>06</span> Vec, String & HashMap</span></a>
+</nav>
+<p class="page-foot">Lesson 05 of 10 · <a href="../index.html">Course overview</a></p>
+</div>
+</main>
+</div>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

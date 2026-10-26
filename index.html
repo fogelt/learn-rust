@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rust from Zero — Interactive Rust lessons</title>
+<meta name="description" content="Learn Rust in ten interactive lessons. Read a short explanation, edit and run real Rust in your browser, then take a quiz.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0b0e13">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A6%80%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body data-total="10">
+<div class="read-progress" aria-hidden="true"><span></span></div>
+<div class="shell">
+<aside class="sidebar" id="sidebar">
+<a class="brand" href="index.html">
+  <span class="brand-mark" aria-hidden="true">🦀</span>
+  <span><span class="brand-name">Rust from Zero</span><span class="brand-sub">Interactive Rust lessons</span></span>
+</a>
+<div class="side-progress">
+  <div class="side-progress-top"><span class="side-progress-label">Your progress</span><span class="side-progress-count" data-progress-count>0 / 10</span></div>
+  <div class="progress-track" data-progress-track role="progressbar" aria-label="Course progress" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0"><span class="progress-fill" data-progress-fill></span></div>
+</div>
+<p class="nav-label">Lessons</p>
+<nav class="nav" aria-label="Lessons">
+<a href="index.html" class="active" aria-current="page"><span class="nav-num" aria-hidden="true">⌂</span><span>Course overview</span></a>
+<a href="lessons/01-hello-rust.html" data-lesson-link="01"><span class="nav-num" aria-hidden="true">01</span><span>Hello, Rust!</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="lessons/02-variables-and-types.html" data-lesson-link="02"><span class="nav-num" aria-hidden="true">02</span><span>Variables, Types & Mutability</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="lessons/03-functions-and-control-flow.html" data-lesson-link="03"><span class="nav-num" aria-hidden="true">03</span><span>Functions & Control Flow</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="lessons/04-ownership-and-borrowing.html" data-lesson-link="04"><span class="nav-num" aria-hidden="true">04</span><span>Ownership & Borrowing</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="lessons/05-structs-enums-matching.html" data-lesson-link="05"><span class="nav-num" aria-hidden="true">05</span><span>Structs, Enums & Matching</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="lessons/06-collections.html" data-lesson-link="06"><span class="nav-num" aria-hidden="true">06</span><span>Vec, String & HashMap</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="lessons/07-error-handling.html" data-lesson-link="07"><span class="nav-num" aria-hidden="true">07</span><span>Option, Result & Errors</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="lessons/08-traits-generics-lifetimes.html" data-lesson-link="08"><span class="nav-num" aria-hidden="true">08</span><span>Traits, Generics & Lifetimes</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="lessons/09-iterators-and-closures.html" data-lesson-link="09"><span class="nav-num" aria-hidden="true">09</span><span>Iterators & Closures</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="lessons/10-modules-and-testing.html" data-lesson-link="10"><span class="nav-num" aria-hidden="true">10</span><span>Modules, Crates & Testing</span><span class="nav-check" aria-hidden="true">✓</span></a>
+</nav>
+<div class="side-foot">10 short lessons · read, run, quiz.<br><a href="https://www.rust-lang.org/learn" target="_blank" rel="noopener">Official Rust resources ↗</a></div>
+</aside>
+<div class="scrim"></div>
+<main class="main">
+<header class="topbar">
+<button class="menu-btn" type="button" aria-label="Open lesson menu" aria-controls="sidebar" aria-expanded="false">☰</button>
+<span class="topbar-title">Rust from Zero</span>
+<span class="brand-mark" aria-hidden="true">🦀</span>
+</header>
+<div class="content index-content">
+<section class="hero">
+  <div>
+    <span class="eyebrow">Interactive Rust course</span>
+    <h1>Learn Rust<br><span class="accent">by doing.</span></h1>
+    <p class="lede">Ten short lessons that take you from your first <code>println!</code> to ownership, traits, iterators, and tests. Every lesson has a real editor that compiles Rust, plus a quiz to lock it in.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="lessons/01-hello-rust.html">Start lesson 01 →</a>
+      <a class="btn btn-secondary" href="#curriculum">Browse the curriculum</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><b>10</b><span>LESSONS</span></div>
+      <div class="hero-stat"><b>40</b><span>QUIZ QUESTIONS</span></div>
+      <div class="hero-stat"><b>10</b><span>LIVE EXERCISES</span></div>
+    </div>
+  </div>
+  <aside class="hero-card">
+    <div class="hero-card-top"><span>main.rs</span><span class="live">live playground</span></div>
+    <pre class="hero-code"><span class="tok-kw">fn</span> main() {
+    <span class="tok-kw">let</span> crab = <span class="tok-str">"Ferris"</span>;
+    <span class="tok-mac">println!</span>(<span class="tok-str">"{crab} says hi 🦀"</span>);
+}</pre>
+    <div class="hero-run"><span>›</span> cargo run <b>· Ferris says hi 🦀</b></div>
+    <div class="hero-progress">
+      <div class="hero-progress-label"><span>Your progress</span><span data-progress-count>0 / 10</span></div>
+      <div class="progress-track" data-progress-track role="progressbar" aria-label="Course progress" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0"><span class="progress-fill" data-progress-fill></span></div>
+    </div>
+  </aside>
+</section>
+
+<section id="curriculum">
+  <div class="section-head">
+    <div><h2>The curriculum</h2><p>Short lessons, ordered so each one builds on the last.</p></div>
+    <span class="count">10 LESSONS · 40 QUESTIONS</span>
+  </div>
+  <div class="course-grid">
+<a class="lesson-card" href="lessons/01-hello-rust.html" data-lesson-card="01">
+<div class="lesson-card-top"><span class="lesson-num">LESSON 01</span><span class="lesson-done">✓ Complete</span></div>
+<h3>Hello, Rust!</h3>
+<p>Install the toolchain, meet Cargo, and run your very first program.</p>
+<div class="chips"><span class="chip">cargo</span><span class="chip">main</span><span class="chip">println!</span></div>
+</a>
+<a class="lesson-card" href="lessons/02-variables-and-types.html" data-lesson-card="02">
+<div class="lesson-card-top"><span class="lesson-num">LESSON 02</span><span class="lesson-done">✓ Complete</span></div>
+<h3>Variables, Types & Mutability</h3>
+<p>Bindings, mutability, shadowing, and Rust's scalar and compound types.</p>
+<div class="chips"><span class="chip">let</span><span class="chip">mut</span><span class="chip">types</span></div>
+</a>
+<a class="lesson-card" href="lessons/03-functions-and-control-flow.html" data-lesson-card="03">
+<div class="lesson-card-top"><span class="lesson-num">LESSON 03</span><span class="lesson-done">✓ Complete</span></div>
+<h3>Functions & Control Flow</h3>
+<p>Write functions that return values, then steer with if, loop, while, and for.</p>
+<div class="chips"><span class="chip">fn</span><span class="chip">if</span><span class="chip">loops</span></div>
+</a>
+<a class="lesson-card" href="lessons/04-ownership-and-borrowing.html" data-lesson-card="04">
+<div class="lesson-card-top"><span class="lesson-num">LESSON 04</span><span class="lesson-done">✓ Complete</span></div>
+<h3>Ownership & Borrowing</h3>
+<p>Rust's superpower: one owner, many borrowers, zero use-after-free.</p>
+<div class="chips"><span class="chip">move</span><span class="chip">borrow</span><span class="chip">&amp;mut</span></div>
+</a>
+<a class="lesson-card" href="lessons/05-structs-enums-matching.html" data-lesson-card="05">
+<div class="lesson-card-top"><span class="lesson-num">LESSON 05</span><span class="lesson-done">✓ Complete</span></div>
+<h3>Structs, Enums & Matching</h3>
+<p>Model data with structs and enums, add methods, and match every possibility.</p>
+<div class="chips"><span class="chip">struct</span><span class="chip">enum</span><span class="chip">match</span></div>
+</a>
+<a class="lesson-card" href="lessons/06-collections.html" data-lesson-card="06">
+<div class="lesson-card-top"><span class="lesson-num">LESSON 06</span><span class="lesson-done">✓ Complete</span></div>
+<h3>Vec, String & HashMap</h3>
+<p>Grow data at runtime with vectors, build strings, and count with hash maps.</p>
+<div class="chips"><span class="chip">Vec</span><span class="chip">String</span><span class="chip">HashMap</span></div>
+</a>
+<a class="lesson-card" href="lessons/07-error-handling.html" data-lesson-card="07">
+<div class="lesson-card-top"><span class="lesson-num">LESSON 07</span><span class="lesson-done">✓ Complete</span></div>
+<h3>Option, Result & Errors</h3>
+<p>Handle missing values and failures without exceptions or null.</p>
+<div class="chips"><span class="chip">Option</span><span class="chip">Result</span><span class="chip">?</span></div>
+</a>
+<a class="lesson-card" href="lessons/08-traits-generics-lifetimes.html" data-lesson-card="08">
+<div class="lesson-card-top"><span class="lesson-num">LESSON 08</span><span class="lesson-done">✓ Complete</span></div>
+<h3>Traits, Generics & Lifetimes</h3>
+<p>Share behaviour with traits, write flexible generics, and read lifetime annotations.</p>
+<div class="chips"><span class="chip">trait</span><span class="chip">generic</span><span class="chip">lifetime</span></div>
+</a>
+<a class="lesson-card" href="lessons/09-iterators-and-closures.html" data-lesson-card="09">
+<div class="lesson-card-top"><span class="lesson-num">LESSON 09</span><span class="lesson-done">✓ Complete</span></div>
+<h3>Iterators & Closures</h3>
+<p>Chain lazy iterator adapters and capture values in closures.</p>
+<div class="chips"><span class="chip">closure</span><span class="chip">map</span><span class="chip">filter</span></div>
+</a>
+<a class="lesson-card" href="lessons/10-modules-and-testing.html" data-lesson-card="10">
+<div class="lesson-card-top"><span class="lesson-num">LESSON 10</span><span class="lesson-done">✓ Complete</span></div>
+<h3>Modules, Crates & Testing</h3>
+<p>Split code into modules, add dependencies, and prove it works with tests.</p>
+<div class="chips"><span class="chip">mod</span><span class="chip">cargo</span><span class="chip">#[test]</span></div>
+</a>
+  </div>
+</section>
+
+<section class="how" id="how-it-works">
+  <div class="how-card">
+    <div class="how-icon" aria-hidden="true">📖</div>
+    <h3>1 · Read</h3>
+    <p>Plain-English explanations with small, focused code samples. No compiler magic hidden behind frameworks.</p>
+  </div>
+  <div class="how-card">
+    <div class="how-icon" aria-hidden="true">⌨️</div>
+    <h3>2 · Practice</h3>
+    <p>Edit real Rust in the browser. Run it against the official Rust compiler, see errors, and fix them.</p>
+  </div>
+  <div class="how-card">
+    <div class="how-icon" aria-hidden="true">✓</div>
+    <h3>3 · Quiz</h3>
+    <p>Four questions per lesson with explanations. Score 3 or better to mark the lesson complete.</p>
+  </div>
+</section>
+
+<footer class="index-foot">
+  <p>Progress lives in your browser (localStorage) — nothing is uploaded. Practice code is compiled by the official <a href="https://play.rust-lang.org" target="_blank" rel="noopener">Rust Playground</a>, so exercises need an internet connection.</p>
+  <p>Prefer to work locally? Install Rust with <a href="https://rustup.rs" target="_blank" rel="noopener">rustup</a>, then use <code>cargo new</code> and <code>cargo run</code>. Further reading: <a href="https://doc.rust-lang.org/book/" target="_blank" rel="noopener">The Rust Programming Language</a> and <a href="https://github.com/rust-lang/rustlings" target="_blank" rel="noopener">Rustlings</a>.</p>
+</footer>
+</div>
+</main>
+</div>
+<script src="assets/site.js" defer></script>
+</body>
+</html>

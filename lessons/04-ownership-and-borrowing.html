@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 · Ownership &amp; Borrowing — Rust from Zero</title>
+<meta name="description" content="Ownership is the idea that makes Rust different. One value has one owner; borrowing lets other code look without taking it. Learn the rules once and the borrow checker becomes an ally.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0b0e13">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A6%80%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body data-lesson="04" data-total="10">
+<div class="read-progress" aria-hidden="true"><span></span></div>
+<div class="shell">
+<aside class="sidebar" id="sidebar">
+<a class="brand" href="../index.html">
+  <span class="brand-mark" aria-hidden="true">🦀</span>
+  <span><span class="brand-name">Rust from Zero</span><span class="brand-sub">Interactive Rust lessons</span></span>
+</a>
+<div class="side-progress">
+  <div class="side-progress-top"><span class="side-progress-label">Your progress</span><span class="side-progress-count" data-progress-count>0 / 10</span></div>
+  <div class="progress-track" data-progress-track role="progressbar" aria-label="Course progress" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0"><span class="progress-fill" data-progress-fill></span></div>
+</div>
+<p class="nav-label">Lessons</p>
+<nav class="nav" aria-label="Lessons">
+<a href="../index.html"><span class="nav-num" aria-hidden="true">⌂</span><span>Course overview</span></a>
+<a href="../lessons/01-hello-rust.html" data-lesson-link="01"><span class="nav-num" aria-hidden="true">01</span><span>Hello, Rust!</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/02-variables-and-types.html" data-lesson-link="02"><span class="nav-num" aria-hidden="true">02</span><span>Variables, Types & Mutability</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/03-functions-and-control-flow.html" data-lesson-link="03"><span class="nav-num" aria-hidden="true">03</span><span>Functions & Control Flow</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/04-ownership-and-borrowing.html" data-lesson-link="04" class="active" aria-current="page"><span class="nav-num" aria-hidden="true">04</span><span>Ownership & Borrowing</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/05-structs-enums-matching.html" data-lesson-link="05"><span class="nav-num" aria-hidden="true">05</span><span>Structs, Enums & Matching</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/06-collections.html" data-lesson-link="06"><span class="nav-num" aria-hidden="true">06</span><span>Vec, String & HashMap</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/07-error-handling.html" data-lesson-link="07"><span class="nav-num" aria-hidden="true">07</span><span>Option, Result & Errors</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/08-traits-generics-lifetimes.html" data-lesson-link="08"><span class="nav-num" aria-hidden="true">08</span><span>Traits, Generics & Lifetimes</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/09-iterators-and-closures.html" data-lesson-link="09"><span class="nav-num" aria-hidden="true">09</span><span>Iterators & Closures</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/10-modules-and-testing.html" data-lesson-link="10"><span class="nav-num" aria-hidden="true">10</span><span>Modules, Crates & Testing</span><span class="nav-check" aria-hidden="true">✓</span></a>
+</nav>
+<div class="side-foot">10 short lessons · read, run, quiz.<br><a href="https://www.rust-lang.org/learn" target="_blank" rel="noopener">Official Rust resources ↗</a></div>
+</aside>
+<div class="scrim"></div>
+<main class="main">
+<header class="topbar">
+<button class="menu-btn" type="button" aria-label="Open lesson menu" aria-controls="sidebar" aria-expanded="false">☰</button>
+<span class="topbar-title">Rust from Zero</span>
+<span class="brand-mark" aria-hidden="true">🦀</span>
+</header>
+<div class="content">
+<header class="lesson-hero">
+<span class="eyebrow">Lesson 04 · Memory</span>
+<h1 class="lesson-title">Ownership & Borrowing</h1>
+<p class="lede">Ownership is the idea that makes Rust different. One value has one owner; borrowing lets other code look without taking it. Learn the rules once and the borrow checker becomes an ally.</p>
+<div class="lesson-meta">
+<span class="pill">⏱ <strong>24 min</strong></span>
+<span class="pill">🦀 <strong>Beginner</strong></span>
+<span class="pill">✎ <strong>1 exercise</strong></span>
+<span class="pill" data-complete-pill hidden>✓ <strong>Completed</strong></span>
+</div>
+</header>
+<section class="lesson-block" id="read">
+<div class="block-head"><span class="step-badge" aria-hidden="true">1</span><h2>Read</h2><span class="block-sub">The idea</span></div>
+<div class="prose"><p>Most languages manage memory with a garbage collector or by making you call <code>free</code>. Rust uses a third approach: the compiler tracks which part of your code owns each value, and inserts the cleanup automatically at the right moment. The rules are simple — enforcing them is the clever part.</p>
+<h3>The three ownership rules</h3>
+<ol><li>Every value has exactly one owner.</li><li>There can only be one owner at a time.</li><li>When the owner goes out of scope, the value is dropped (its memory is freed).</li></ol>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">fn main() {
+    let s1 = String::from(&quot;hello&quot;);
+    let s2 = s1; // ownership moves from s1 to s2
+
+    println!(&quot;{s2}&quot;);
+
+    // println!(&quot;{s1}&quot;); // error[E0382]: borrow of moved value: s1
+}</code></pre>
+</div>
+<p>A <code>String</code> is a small struct on the stack — pointer, length, capacity — pointing at bytes on the heap. Assignment does not copy the heap bytes; it moves the pointer. Rust then invalidates <code>s1</code>. If both names stayed usable, both would free the same allocation at the end of scope: a double free. The compiler forbids it.</p>
+<p>Types that live entirely on the stack and are cheap to copy implement the <code>Copy</code> trait. For them, assignment copies instead of moving:</p>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">fn main() {
+    let x = 5;
+    let y = x;
+
+    println!(&quot;{x} and {y}&quot;); // both are valid
+}</code></pre>
+</div>
+<p>Integers, floats, <code>bool</code>, <code>char</code>, and tuples or arrays made entirely of <code>Copy</code> types are <code>Copy</code>. <code>String</code>, <code>Vec</code>, and <code>HashMap</code> are not.</p>
+<p>If you genuinely need two independent heap values, clone explicitly:</p>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">let s1 = String::from(&quot;hello&quot;);
+let s2 = s1.clone();
+println!(&quot;{s1} {s2}&quot;); // both valid</code></pre>
+</div>
+<p><code>clone</code> can be expensive. Reaching for it to silence the borrow checker is usually a design smell; borrowing is normally what you want.</p>
+<h3>Moving into functions</h3>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">fn consume(message: String) {
+    println!(&quot;{message}&quot;);
+}
+
+fn main() {
+    let msg = String::from(&quot;hello&quot;);
+    consume(msg); // msg is moved into the function
+
+    // println!(&quot;{msg}&quot;); // error: value borrowed here after move
+}</code></pre>
+</div>
+<p>Passing a <code>String</code> by value transfers ownership. The function drops it when it returns. To let the caller keep the value, pass a reference instead.</p>
+<h3>Borrowing with references</h3>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">fn length(text: &amp;str) -&gt; usize {
+    text.len()
+}
+
+fn main() {
+    let message = String::from(&quot;hello&quot;);
+    let len = length(&amp;message); // borrow, do not move
+
+    println!(&quot;{message} has {len} bytes&quot;);
+}</code></pre>
+</div>
+<p>The <code>&amp;</code> creates a reference. The function reads through it but does not own the <code>String</code>, so <code>message</code> is still usable afterwards. Here <code>&amp;String</code> is automatically coerced to <code>&amp;str</code> — a more flexible borrowed string type.</p>
+<p>Immutable references can be shared freely:</p>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">let message = String::from(&quot;hello&quot;);
+let a = &amp;message;
+let b = &amp;message;
+
+println!(&quot;{a} {b}&quot;); // fine: many readers</code></pre>
+</div>
+<p>If a function needs to change the value, borrow it mutably. The binding itself must be <code>mut</code> too:</p>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">fn add_suffix(text: &amp;mut String) {
+    text.push_str(&quot;!&quot;);
+}
+
+fn main() {
+    let mut message = String::from(&quot;hello&quot;);
+    add_suffix(&amp;mut message);
+    println!(&quot;{message}&quot;); // hello!
+}</code></pre>
+</div>
+<h3>The borrowing rules</h3>
+<div class="callout warn">
+<span class="callout-title">One rule to remember</span>
+<p>At any given time, you can have either <strong>any number of immutable references</strong> (<code>&amp;T</code>) <strong>or exactly one mutable reference</strong> (<code>&amp;mut T</code>) — never both. Every reference must always be valid.</p>
+</div>
+<p>Why so strict? A mutable reference is exclusive access, and immutable references are shared access. Allowing both at once would let one part of your code change a value while another is reading it — the classic data race. Rust moves that bug from runtime to compile time.</p>
+<p>Borrows end at their last use, not at the end of the block. Thanks to this non-lexical lifetime analysis, sequential borrows are fine:</p>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">let mut text = String::from(&quot;hi&quot;);
+
+let first = &amp;text;
+println!(&quot;{first}&quot;); // last use of first
+
+text.push_str(&quot;!&quot;);  // okay: the immutable borrow has ended</code></pre>
+</div>
+<p>Rust also prevents dangling references. You cannot return a reference to a local value that is about to be dropped; the compiler will reject it. Lesson 8 shows how lifetime annotations describe these relationships when the compiler needs help.</p>
+<h3>Slices: borrowing part of a collection</h3>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">fn main() {
+    let text = String::from(&quot;hello world&quot;);
+    let hello = &amp;text[0..5];
+    let world = &amp;text[6..11];
+
+    println!(&quot;{hello} / {world}&quot;);
+
+    let numbers = [1, 2, 3, 4, 5];
+    let middle = &amp;numbers[1..4];
+    println!(&quot;{middle:?}&quot;); // [2, 3, 4]
+}</code></pre>
+</div>
+<p>A string slice (<code>&amp;str</code>) points into an existing string and carries a length. An array slice (<code>&amp;[T]</code>) works the same way. Slicing by byte index can panic if the index is not on a character boundary — more on that in lesson 6.</p>
+<div class="callout tip">
+<span class="callout-title">How to stop fighting the borrow checker</span>
+<p>When a value is moved and you still need it, first ask: does this function really need to own it? Change the parameter to <code>&amp;T</code> or <code>&amp;mut T</code>. Reach for <code>clone()</code> only when you truly need an independent copy.</p>
+</div></div>
+</section>
+<section class="lesson-block" id="practice">
+<div class="block-head"><span class="step-badge" aria-hidden="true">2</span><h2>Practice</h2><span class="block-sub">Live compiler</span></div>
+<div class="task">
+<span class="task-label">✦ Your turn</span><p>This program tries to use <code>greeting</code> after moving it into <code>moved</code>. Fix it without calling <code>.clone()</code>: borrow the string with <code>&amp;</code> so both lines can print.</p>
+<span class="expected" aria-label="Expected output">Hello, Rust
+Hello, Rust</span>
+<p class="hint">Change <code>let moved = greeting;</code> to <code>let moved = &amp;greeting;</code>. Now <code>moved</code> is a reference, and ownership never leaves <code>greeting</code>.</p>
+</div>
+<div class="playground">
+<div class="pg-head">
+  <div class="pg-title"><span class="pg-dots" aria-hidden="true"><i></i><i></i><i></i></span>main.rs <span class="pg-badge">edition 2021</span></div>
+  <div class="pg-actions">
+    <button type="button" class="btn btn-ghost pg-solution">Solution</button>
+    <button type="button" class="btn btn-ghost pg-reset">Reset</button>
+    <button type="button" class="btn btn-primary pg-run"><span class="run-label">▶ Run</span> <kbd>Ctrl ↵</kbd></button>
+  </div>
+</div>
+<div class="editor">
+  <pre class="editor-highlight" aria-hidden="true"><code class="rust"></code></pre>
+  <textarea class="editor-input" spellcheck="false" wrap="off" autocapitalize="off" autocomplete="off" aria-label="Rust code editor">fn main() {
+    let greeting = String::from(&quot;Hello, Rust&quot;);
+    let moved = greeting;
+
+    // TODO: borrow instead of moving, then keep both prints
+    println!(&quot;{greeting}&quot;);
+    println!(&quot;{moved}&quot;);
+}</textarea>
+</div>
+<div class="pg-output" hidden>
+  <div class="pg-output-head"><span>Output</span><span class="pg-status idle">ready</span></div>
+  <pre class="pg-out" aria-live="polite"></pre>
+  <div class="pg-verdict" role="status"></div>
+  <div class="pg-warn" hidden>
+    <div class="pg-output-head"><span>Compiler notes</span></div>
+    <pre></pre>
+  </div>
+</div>
+<div class="pg-note">Runs on the official <a href="https://play.rust-lang.org" target="_blank" rel="noopener">Rust Playground</a> · stable · internet required</div>
+<script type="text/plain" class="pg-expect">Hello, Rust
+Hello, Rust</script>
+<script type="text/plain" class="pg-solution-code">fn main() {
+    let greeting = String::from("Hello, Rust");
+    let borrowed = &greeting;
+
+    println!("{greeting}");
+    println!("{borrowed}");
+}</script>
+</div>
+</section>
+<section class="lesson-block" id="quiz">
+<div class="block-head"><span class="step-badge" aria-hidden="true">3</span><h2>Quiz</h2><span class="block-sub">Check yourself</span></div>
+<div class="prose quiz-intro"><p>Four questions. Get three or more right to complete the lesson — you can retry as often as you like.</p></div>
+<div class="quiz">
+<fieldset class="quiz-q" data-answer="1">
+<legend><span class="q-num" aria-hidden="true">01</span><span>After <code>let b = a;</code> where <code>a</code> is a <code>String</code>, what happens to <code>a</code>?</span></legend>
+<div class="options"><label class="opt">
+<input type="radio" name="q04_0" value="0">
+<span class="opt-key" aria-hidden="true">A</span>
+<span class="opt-text">It is cloned automatically.</span>
+</label><label class="opt">
+<input type="radio" name="q04_0" value="1">
+<span class="opt-key" aria-hidden="true">B</span>
+<span class="opt-text">It is moved: <code>a</code> can no longer be used.</span>
+</label><label class="opt">
+<input type="radio" name="q04_0" value="2">
+<span class="opt-key" aria-hidden="true">C</span>
+<span class="opt-text">It becomes a reference to <code>b</code>.</span>
+</label><label class="opt">
+<input type="radio" name="q04_0" value="3">
+<span class="opt-key" aria-hidden="true">D</span>
+<span class="opt-text">Nothing — both names own the same heap data.</span>
+</label></div>
+<div class="explain" hidden><strong>Why:</strong> Assignment moves ownership for non-<code>Copy</code> types. Using <code>a</code> afterwards is a compile error. To keep both usable, borrow with <code>&amp;a</code> or clone explicitly.</div>
+</fieldset><fieldset class="quiz-q" data-answer="2">
+<legend><span class="q-num" aria-hidden="true">02</span><span>Which combination of references is allowed at the same time?</span></legend>
+<div class="options"><label class="opt">
+<input type="radio" name="q04_1" value="0">
+<span class="opt-key" aria-hidden="true">A</span>
+<span class="opt-text">Two <code>&amp;mut T</code> references</span>
+</label><label class="opt">
+<input type="radio" name="q04_1" value="1">
+<span class="opt-key" aria-hidden="true">B</span>
+<span class="opt-text">One <code>&amp;mut T</code> and one <code>&amp;T</code> to the same value</span>
+</label><label class="opt">
+<input type="radio" name="q04_1" value="2">
+<span class="opt-key" aria-hidden="true">C</span>
+<span class="opt-text">Any number of <code>&amp;T</code> references</span>
+</label><label class="opt">
+<input type="radio" name="q04_1" value="3">
+<span class="opt-key" aria-hidden="true">D</span>
+<span class="opt-text">No references at all</span>
+</label></div>
+<div class="explain" hidden><strong>Why:</strong> Many readers or exactly one writer, never both. Immutable references (<code>&amp;T</code>) can be shared freely because nobody can change the value through them.</div>
+</fieldset><fieldset class="quiz-q" data-answer="1">
+<legend><span class="q-num" aria-hidden="true">03</span><span>How can a function read a <code>String</code> without taking ownership?</span></legend>
+<div class="options"><label class="opt">
+<input type="radio" name="q04_2" value="0">
+<span class="opt-key" aria-hidden="true">A</span>
+<span class="opt-text">Accept it by value: <code>fn f(s: String)</code></span>
+</label><label class="opt">
+<input type="radio" name="q04_2" value="1">
+<span class="opt-key" aria-hidden="true">B</span>
+<span class="opt-text">Accept a reference: <code>fn f(s: &amp;str)</code> and call <code>f(&amp;s)</code></span>
+</label><label class="opt">
+<input type="radio" name="q04_2" value="2">
+<span class="opt-key" aria-hidden="true">C</span>
+<span class="opt-text">Return it immediately</span>
+</label><label class="opt">
+<input type="radio" name="q04_2" value="3">
+<span class="opt-key" aria-hidden="true">D</span>
+<span class="opt-text">Mark the parameter <code>mut</code></span>
+</label></div>
+<div class="explain" hidden><strong>Why:</strong> Borrowing with <code>&amp;str</code> (or <code>&amp;String</code>) lets the caller keep ownership. Passing by value moves the string into the function, and it is dropped when the function returns.</div>
+</fieldset><fieldset class="quiz-q" data-answer="1">
+<legend><span class="q-num" aria-hidden="true">04</span><span>What does the borrow checker guarantee?</span></legend>
+<div class="options"><label class="opt">
+<input type="radio" name="q04_3" value="0">
+<span class="opt-key" aria-hidden="true">A</span>
+<span class="opt-text">That your program never panics.</span>
+</label><label class="opt">
+<input type="radio" name="q04_3" value="1">
+<span class="opt-key" aria-hidden="true">B</span>
+<span class="opt-text">That references never outlive the data they point to, and that aliasing rules hold.</span>
+</label><label class="opt">
+<input type="radio" name="q04_3" value="2">
+<span class="opt-key" aria-hidden="true">C</span>
+<span class="opt-text">That your program never allocates on the heap.</span>
+</label><label class="opt">
+<input type="radio" name="q04_3" value="3">
+<span class="opt-key" aria-hidden="true">D</span>
+<span class="opt-text">That all data races are detected at runtime.</span>
+</label></div>
+<div class="explain" hidden><strong>Why:</strong> Ownership and borrowing are checked at compile time. They rule out use-after-free and data races, but they do not prevent panics from explicit <code>panic!</code> calls or out-of-bounds indexing.</div>
+</fieldset>
+<div class="quiz-actions">
+<button type="button" class="btn btn-primary quiz-check">Check answers</button>
+<button type="button" class="btn btn-ghost quiz-retry">Reset quiz</button>
+<span class="quiz-score" role="status" aria-live="polite"></span>
+</div>
+</div>
+</section>
+<nav class="lesson-nav" aria-label="Lesson navigation">
+<a class="nav-card" href="03-functions-and-control-flow.html"><span class="dir">← Previous</span><span class="name"><span>03</span> Functions & Control Flow</span></a>
+<a class="nav-card next" href="05-structs-enums-matching.html"><span class="dir">Next →</span><span class="name"><span>05</span> Structs, Enums & Matching</span></a>
+</nav>
+<p class="page-foot">Lesson 04 of 10 · <a href="../index.html">Course overview</a></p>
+</div>
+</main>
+</div>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>

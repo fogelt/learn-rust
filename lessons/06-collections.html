@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>06 · Vec, String &amp; HashMap — Rust from Zero</title>
+<meta name="description" content="Real programs need data that grows. Vectors hold lists, Strings hold text, and hash maps answer “what is the value for this key?” — all three own their contents on the heap.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0b0e13">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A6%80%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body data-lesson="06" data-total="10">
+<div class="read-progress" aria-hidden="true"><span></span></div>
+<div class="shell">
+<aside class="sidebar" id="sidebar">
+<a class="brand" href="../index.html">
+  <span class="brand-mark" aria-hidden="true">🦀</span>
+  <span><span class="brand-name">Rust from Zero</span><span class="brand-sub">Interactive Rust lessons</span></span>
+</a>
+<div class="side-progress">
+  <div class="side-progress-top"><span class="side-progress-label">Your progress</span><span class="side-progress-count" data-progress-count>0 / 10</span></div>
+  <div class="progress-track" data-progress-track role="progressbar" aria-label="Course progress" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0"><span class="progress-fill" data-progress-fill></span></div>
+</div>
+<p class="nav-label">Lessons</p>
+<nav class="nav" aria-label="Lessons">
+<a href="../index.html"><span class="nav-num" aria-hidden="true">⌂</span><span>Course overview</span></a>
+<a href="../lessons/01-hello-rust.html" data-lesson-link="01"><span class="nav-num" aria-hidden="true">01</span><span>Hello, Rust!</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/02-variables-and-types.html" data-lesson-link="02"><span class="nav-num" aria-hidden="true">02</span><span>Variables, Types & Mutability</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/03-functions-and-control-flow.html" data-lesson-link="03"><span class="nav-num" aria-hidden="true">03</span><span>Functions & Control Flow</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/04-ownership-and-borrowing.html" data-lesson-link="04"><span class="nav-num" aria-hidden="true">04</span><span>Ownership & Borrowing</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/05-structs-enums-matching.html" data-lesson-link="05"><span class="nav-num" aria-hidden="true">05</span><span>Structs, Enums & Matching</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/06-collections.html" data-lesson-link="06" class="active" aria-current="page"><span class="nav-num" aria-hidden="true">06</span><span>Vec, String & HashMap</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/07-error-handling.html" data-lesson-link="07"><span class="nav-num" aria-hidden="true">07</span><span>Option, Result & Errors</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/08-traits-generics-lifetimes.html" data-lesson-link="08"><span class="nav-num" aria-hidden="true">08</span><span>Traits, Generics & Lifetimes</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/09-iterators-and-closures.html" data-lesson-link="09"><span class="nav-num" aria-hidden="true">09</span><span>Iterators & Closures</span><span class="nav-check" aria-hidden="true">✓</span></a>
+<a href="../lessons/10-modules-and-testing.html" data-lesson-link="10"><span class="nav-num" aria-hidden="true">10</span><span>Modules, Crates & Testing</span><span class="nav-check" aria-hidden="true">✓</span></a>
+</nav>
+<div class="side-foot">10 short lessons · read, run, quiz.<br><a href="https://www.rust-lang.org/learn" target="_blank" rel="noopener">Official Rust resources ↗</a></div>
+</aside>
+<div class="scrim"></div>
+<main class="main">
+<header class="topbar">
+<button class="menu-btn" type="button" aria-label="Open lesson menu" aria-controls="sidebar" aria-expanded="false">☰</button>
+<span class="topbar-title">Rust from Zero</span>
+<span class="brand-mark" aria-hidden="true">🦀</span>
+</header>
+<div class="content">
+<header class="lesson-hero">
+<span class="eyebrow">Lesson 06 · Collections</span>
+<h1 class="lesson-title">Vec, String & HashMap</h1>
+<p class="lede">Real programs need data that grows. Vectors hold lists, Strings hold text, and hash maps answer “what is the value for this key?” — all three own their contents on the heap.</p>
+<div class="lesson-meta">
+<span class="pill">⏱ <strong>20 min</strong></span>
+<span class="pill">🦀 <strong>Beginner</strong></span>
+<span class="pill">✎ <strong>1 exercise</strong></span>
+<span class="pill" data-complete-pill hidden>✓ <strong>Completed</strong></span>
+</div>
+</header>
+<section class="lesson-block" id="read">
+<div class="block-head"><span class="step-badge" aria-hidden="true">1</span><h2>Read</h2><span class="block-sub">The idea</span></div>
+<div class="prose"><p>Arrays have a fixed length known at compile time. A <code>Vec&lt;T&gt;</code> is a growable array on the heap: it owns its elements, tracks its length and capacity, and reallocates as needed. This is the list type you will reach for most often.</p>
+<h3>Vectors</h3>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">fn main() {
+    let mut scores = vec![90, 80, 70];
+
+    scores.push(60);
+    scores[0] = 95;
+
+    println!(&quot;{:?}&quot;, scores);          // [95, 80, 70, 60]
+    println!(&quot;len = {}&quot;, scores.len());
+    println!(&quot;first = {}&quot;, scores[0]);
+
+    match scores.get(10) {
+        Some(score) =&gt; println!(&quot;score at 10: {score}&quot;),
+        None =&gt; println!(&quot;no score at index 10&quot;),
+    }
+}</code></pre>
+</div>
+<ul><li><code>vec![...]</code> builds a vector from a list of values; <code>Vec::new()</code> starts empty and usually needs a type annotation.</li><li><code>push</code> appends, <code>pop</code> removes and returns the last element as an <code>Option&lt;T&gt;</code>.</li><li><code>scores[0]</code> panics on an invalid index; <code>get(0)</code> returns <code>Option&lt;&amp;T&gt;</code> and is the safe choice for untrusted indexes.</li><li><code>for score in &amp;scores</code> iterates by reference; <code>for score in &amp;mut scores</code> iterates mutably; <code>for score in scores</code> consumes the vector and yields owned values.</li></ul>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">fn main() {
+    let mut numbers = vec![3, 1, 4, 1, 5];
+
+    for number in &amp;mut numbers {
+        *number += 10; // dereference the mutable borrow
+    }
+
+    numbers.sort();
+    numbers.dedup();
+
+    println!(&quot;{numbers:?}&quot;); // [11, 13, 14, 15]
+}</code></pre>
+</div>
+<p>Vectors must contain a single type. If you need mixed types, use an enum with one variant per type — the same trick works for JSON-like data, as you will see with <code>serde</code> later.</p>
+<h3>Strings: String vs &str</h3>
+<p>Rust has two string types that are easy to confuse. A <code>&amp;str</code> is a borrowed view into UTF-8 text — a pointer and a length. A <code>String</code> owns a growable, heap-allocated buffer. String literals are <code>&amp;'static str</code>: they live in the binary for the whole program.</p>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">fn main() {
+    let mut greeting = String::from(&quot;hello&quot;);
+    greeting.push_str(&quot;, world&quot;);
+    greeting.push('!');
+
+    println!(&quot;{greeting}&quot;);
+    println!(&quot;chars = {}&quot;, greeting.chars().count());
+    println!(&quot;bytes = {}&quot;, greeting.len());
+}</code></pre>
+</div>
+<div class="table-wrap"><table>
+<thead><tr><th>Operation</th><th>Notes</th></tr></thead>
+<tbody><tr><td><code>String::from(s)</code>, <code>s.to_string()</code></td><td>Create an owned string from a borrowed one.</td></tr><tr><td><code>format!(&quot;{a}{b}&quot;)</code></td><td>Build a new <code>String</code> from pieces without consuming them.</td></tr><tr><td><code>push_str(&amp;str)</code>, <code>push(char)</code></td><td>Append to a mutable <code>String</code>.</td></tr><tr><td><code>&amp;s[a..b]</code></td><td>Borrow a byte range. Panics if the boundary is inside a UTF-8 character.</td></tr><tr><td><code>s.chars()</code>, <code>s.bytes()</code></td><td>Iterate Unicode scalar values or raw bytes.</td></tr><tr><td><code>s.len()</code></td><td>Length in <strong>bytes</strong>, not characters.</td></tr></tbody>
+</table></div>
+<p>Prefer <code>&amp;str</code> in function parameters — it accepts both literals and <code>&amp;String</code> via deref coercion. Return <code>String</code> when the function creates new text.</p>
+<div class="callout warn">
+<span class="callout-title">Indexing a String</span>
+<p>You cannot write <code>s[0]</code> to get a character: UTF-8 characters have variable width, so a byte index is not a character index. Use <code>&amp;s[0..1]</code> only for known-safe ASCII, or iterate with <code>s.chars()</code>.</p>
+</div>
+<h3>HashMap: key → value</h3>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">use std::collections::HashMap;
+
+fn main() {
+    let mut scores: HashMap&lt;String, i32&gt; = HashMap::new();
+
+    scores.insert(String::from(&quot;blue&quot;), 10);
+    scores.insert(String::from(&quot;yellow&quot;), 50);
+
+    println!(&quot;{:?}&quot;, scores.get(&quot;blue&quot;)); // Some(10)
+    println!(&quot;{}&quot;, scores.get(&quot;green&quot;).copied().unwrap_or(0)); // 0
+
+    for (team, score) in &amp;scores {
+        println!(&quot;{team}: {score}&quot;);
+    }
+}</code></pre>
+</div>
+<p><code>get</code> returns <code>Option&lt;&amp;V&gt;</code>, so a missing key is not an error. <code>insert</code> replaces any existing value. The <code>entry</code> API combines “look up or insert” in one step, which is perfect for counting:</p>
+<div class="codeblock">
+<div class="codeblock-head"><span class="codeblock-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>main.rs</span></div>
+<pre><code class="rust">use std::collections::HashMap;
+
+fn main() {
+    let text = &quot;the cat and the hat&quot;;
+    let mut counts: HashMap&lt;&amp;str, u32&gt; = HashMap::new();
+
+    for word in text.split_whitespace() {
+        *counts.entry(word).or_insert(0) += 1;
+    }
+
+    println!(&quot;{counts:?}&quot;);
+}</code></pre>
+</div>
+<p><code>or_insert(0)</code> returns a mutable reference to the existing value or inserts <code>0</code> and returns a reference to that. Dereferencing with <code>*</code> lets you increment it.</p>
+<p>Hash maps do not preserve insertion order, and iteration order can change between runs. If you need sorted keys, use <code>BTreeMap</code>; if you need fast set membership, use <code>HashSet</code>. Keys must implement <code>Eq</code> and <code>Hash</code>.</p>
+<p>For small lookup tables, a <code>match</code> or an array is often simpler and faster than a hash map. Reach for <code>HashMap</code> when the key set is dynamic.</p></div>
+</section>
+<section class="lesson-block" id="practice">
+<div class="block-head"><span class="step-badge" aria-hidden="true">2</span><h2>Practice</h2><span class="block-sub">Live compiler</span></div>
+<div class="task">
+<span class="task-label">✦ Your turn</span><p>Use the entry API to count every word in <code>text</code>. Then run it: <code>counts.get(&quot;the&quot;)</code> should be 3, and <code>counts.len()</code> should be 3.</p>
+<span class="expected" aria-label="Expected output">the -&gt; 3
+unique = 3</span>
+<p class="hint">Inside the loop: <code>*counts.entry(word).or_insert(0) += 1;</code>. The <code>*</code> dereferences the <code>&amp;mut u32</code> returned by <code>or_insert</code>.</p>
+</div>
+<div class="playground">
+<div class="pg-head">
+  <div class="pg-title"><span class="pg-dots" aria-hidden="true"><i></i><i></i><i></i></span>main.rs <span class="pg-badge">edition 2021</span></div>
+  <div class="pg-actions">
+    <button type="button" class="btn btn-ghost pg-solution">Solution</button>
+    <button type="button" class="btn btn-ghost pg-reset">Reset</button>
+    <button type="button" class="btn btn-primary pg-run"><span class="run-label">▶ Run</span> <kbd>Ctrl ↵</kbd></button>
+  </div>
+</div>
+<div class="editor">
+  <pre class="editor-highlight" aria-hidden="true"><code class="rust"></code></pre>
+  <textarea class="editor-input" spellcheck="false" wrap="off" autocapitalize="off" autocomplete="off" aria-label="Rust code editor">use std::collections::HashMap;
+
+fn main() {
+    let text = &quot;the quick the lazy the&quot;;
+    let mut counts: HashMap&lt;&amp;str, u32&gt; = HashMap::new();
+
+    for word in text.split_whitespace() {
+        // TODO: increase this word's count with the entry API
+    }
+
+    println!(&quot;the -&gt; {}&quot;, counts.get(&quot;the&quot;).unwrap_or(&amp;0));
+    println!(&quot;unique = {}&quot;, counts.len());
+}</textarea>
+</div>
+<div class="pg-output" hidden>
+  <div class="pg-output-head"><span>Output</span><span class="pg-status idle">ready</span></div>
+  <pre class="pg-out" aria-live="polite"></pre>
+  <div class="pg-verdict" role="status"></div>
+  <div class="pg-warn" hidden>
+    <div class="pg-output-head"><span>Compiler notes</span></div>
+    <pre></pre>
+  </div>
+</div>
+<div class="pg-note">Runs on the official <a href="https://play.rust-lang.org" target="_blank" rel="noopener">Rust Playground</a> · stable · internet required</div>
+<script type="text/plain" class="pg-expect">the -> 3
+unique = 3</script>
+<script type="text/plain" class="pg-solution-code">use std::collections::HashMap;
+
+fn main() {
+    let text = "the quick the lazy the";
+    let mut counts: HashMap<&str, u32> = HashMap::new();
+
+    for word in text.split_whitespace() {
+        *counts.entry(word).or_insert(0) += 1;
+    }
+
+    println!("the -> {}", counts.get("the").unwrap_or(&0));
+    println!("unique = {}", counts.len());
+}</script>
+</div>
+</section>
+<section class="lesson-block" id="quiz">
+<div class="block-head"><span class="step-badge" aria-hidden="true">3</span><h2>Quiz</h2><span class="block-sub">Check yourself</span></div>
+<div class="prose quiz-intro"><p>Four questions. Get three or more right to complete the lesson — you can retry as often as you like.</p></div>
+<div class="quiz">
+<fieldset class="quiz-q" data-answer="1">
+<legend><span class="q-num" aria-hidden="true">01</span><span>What does <code>scores.get(99)</code> return for a <code>Vec&lt;i32&gt;</code>?</span></legend>
+<div class="options"><label class="opt">
+<input type="radio" name="q06_0" value="0">
+<span class="opt-key" aria-hidden="true">A</span>
+<span class="opt-text">The value at index 99, or 0 if missing.</span>
+</label><label class="opt">
+<input type="radio" name="q06_0" value="1">
+<span class="opt-key" aria-hidden="true">B</span>
+<span class="opt-text"><code>Option&lt;&amp;i32&gt;</code>: <code>Some</code> or <code>None</code></span>
+</label><label class="opt">
+<input type="radio" name="q06_0" value="2">
+<span class="opt-key" aria-hidden="true">C</span>
+<span class="opt-text">It panics when the index is out of bounds.</span>
+</label><label class="opt">
+<input type="radio" name="q06_0" value="3">
+<span class="opt-key" aria-hidden="true">D</span>
+<span class="opt-text">A copy of the whole vector.</span>
+</label></div>
+<div class="explain" hidden><strong>Why:</strong> <code>get</code> is the checked lookup and returns <code>Option&lt;&amp;T&gt;</code>. The <code>[]</code> operator is the unchecked one and panics on an invalid index.</div>
+</fieldset><fieldset class="quiz-q" data-answer="0">
+<legend><span class="q-num" aria-hidden="true">02</span><span>Which method appends a <code>&amp;str</code> to an existing <code>String</code>?</span></legend>
+<div class="options"><label class="opt">
+<input type="radio" name="q06_1" value="0">
+<span class="opt-key" aria-hidden="true">A</span>
+<span class="opt-text"><code>s.push_str(&quot;more&quot;)</code></span>
+</label><label class="opt">
+<input type="radio" name="q06_1" value="1">
+<span class="opt-key" aria-hidden="true">B</span>
+<span class="opt-text"><code>s + &quot;more&quot;</code></span>
+</label><label class="opt">
+<input type="radio" name="q06_1" value="2">
+<span class="opt-key" aria-hidden="true">C</span>
+<span class="opt-text"><code>s.append(&quot;more&quot;)</code></span>
+</label><label class="opt">
+<input type="radio" name="q06_1" value="3">
+<span class="opt-key" aria-hidden="true">D</span>
+<span class="opt-text"><code>s.extend(&quot;more&quot;)</code></span>
+</label></div>
+<div class="explain" hidden><strong>Why:</strong> <code>push_str</code> appends borrowed text and returns nothing. <code>push</code> appends a single <code>char</code>. The <code>+</code> operator works but consumes the left-hand <code>String</code>; <code>format!</code> is usually clearer.</div>
+</fieldset><fieldset class="quiz-q" data-answer="1">
+<legend><span class="q-num" aria-hidden="true">03</span><span>What does <code>map.entry(key).or_insert(0)</code> do?</span></legend>
+<div class="options"><label class="opt">
+<input type="radio" name="q06_2" value="0">
+<span class="opt-key" aria-hidden="true">A</span>
+<span class="opt-text">Returns <code>0</code> if the key is missing and removes the key.</span>
+</label><label class="opt">
+<input type="radio" name="q06_2" value="1">
+<span class="opt-key" aria-hidden="true">B</span>
+<span class="opt-text">Inserts <code>0</code> when the key is missing, then returns a mutable reference to the value.</span>
+</label><label class="opt">
+<input type="radio" name="q06_2" value="2">
+<span class="opt-key" aria-hidden="true">C</span>
+<span class="opt-text">Panics if the key already exists.</span>
+</label><label class="opt">
+<input type="radio" name="q06_2" value="3">
+<span class="opt-key" aria-hidden="true">D</span>
+<span class="opt-text">Returns an <code>Option</code> without changing the map.</span>
+</label></div>
+<div class="explain" hidden><strong>Why:</strong> The entry API gives you a slot for a key. <code>or_insert</code> fills it if needed and returns <code>&amp;mut V</code>, which is why counting uses <code>*map.entry(k).or_insert(0) += 1</code>.</div>
+</fieldset><fieldset class="quiz-q" data-answer="1">
+<legend><span class="q-num" aria-hidden="true">04</span><span>What does <code>String::len()</code> return?</span></legend>
+<div class="options"><label class="opt">
+<input type="radio" name="q06_3" value="0">
+<span class="opt-key" aria-hidden="true">A</span>
+<span class="opt-text">The number of Unicode characters.</span>
+</label><label class="opt">
+<input type="radio" name="q06_3" value="1">
+<span class="opt-key" aria-hidden="true">B</span>
+<span class="opt-text">The number of bytes in the UTF-8 encoding.</span>
+</label><label class="opt">
+<input type="radio" name="q06_3" value="2">
+<span class="opt-key" aria-hidden="true">C</span>
+<span class="opt-text">The number of words.</span>
+</label><label class="opt">
+<input type="radio" name="q06_3" value="3">
+<span class="opt-key" aria-hidden="true">D</span>
+<span class="opt-text">The allocated capacity.</span>
+</label></div>
+<div class="explain" hidden><strong>Why:</strong> <code>len</code> returns the byte length. <code>chars().count()</code> returns the number of Unicode scalar values, which can be smaller for non-ASCII text.</div>
+</fieldset>
+<div class="quiz-actions">
+<button type="button" class="btn btn-primary quiz-check">Check answers</button>
+<button type="button" class="btn btn-ghost quiz-retry">Reset quiz</button>
+<span class="quiz-score" role="status" aria-live="polite"></span>
+</div>
+</div>
+</section>
+<nav class="lesson-nav" aria-label="Lesson navigation">
+<a class="nav-card" href="05-structs-enums-matching.html"><span class="dir">← Previous</span><span class="name"><span>05</span> Structs, Enums & Matching</span></a>
+<a class="nav-card next" href="07-error-handling.html"><span class="dir">Next →</span><span class="name"><span>07</span> Option, Result & Errors</span></a>
+</nav>
+<p class="page-foot">Lesson 06 of 10 · <a href="../index.html">Course overview</a></p>
+</div>
+</main>
+</div>
+<script src="../assets/site.js" defer></script>
+</body>
+</html>
